@@ -15,7 +15,8 @@ queue = []
 queue_interval_minutes = 10
 queue_interval = 60*queue_interval_minutes
 poll_sleep_interval = 5
-logger = logging.getLogger('lloid')
+
+logger = logging.getLogger(__name__)
 
 class Command:
     Successful = 0
@@ -379,7 +380,7 @@ class Lloid(discord.Client):
         if message.content == "!queueinfo":
             await self.handle_queueinfo(message)
 
-if __name__ == "__main__":
+def setup_logger():
     parser = argparse.ArgumentParser()
     parser.add_argument('--verbose', '-v', action='count', help='Sets the verbosity level of the logger.', default=0, required=False)
     args = parser.parse_args()
@@ -393,8 +394,16 @@ if __name__ == "__main__":
     elif verbosity <= 0:
         log_level = logging.WARNING
 
-    logging.basicConfig(format='[%(asctime)s] %(levelname)s %(filename)s@%(lineno)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')  
+    formatter = logging.Formatter(fmt='[%(asctime)s] %(levelname)s %(filename)s@%(lineno)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+    handler = logging.StreamHandler()
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
     logger.setLevel(log_level)
+    logger.propagate = False
+    logging.getLogger().handlers = []
+
+if __name__ == "__main__":
+    setup_logger()
     logger.info(f"Set logging level to {logging.getLevelName(log_level)}")
 
     logger.info("Starting Lloid...")
